@@ -1,5 +1,6 @@
 import com.rabbitmq.client.*;
 import org.demo.connections.RabbitMQQueueManager;
+import spring.GreetingController;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,17 +31,26 @@ public class Visualizer {
         createDataConsumer(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
         //createDataConsumer2(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
 
+
+        //Greeting webstorage = new Greeting(0,"0");
+
         for (int i = 0; i < 100000; i++) {
 
                 System.out.println("durchsatz:" + dataCtr);
                 //if (dataCtr > maxDataPerSecond) {
-                    String message = Double.toString(((double) (dataCtr) / maxDataPerSecond));
+                    String message = Double.toString(((double) dataCtr / maxDataPerSecond));
                     System.out.println("Too much man!!, sending correction signal:" + message);
                     try {
                         dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+
+                    // display new data
+                    //webstorage.content = dataBuffer.toString();
+
+
                 //}
             dataCtr = 0;
             try {
@@ -77,6 +87,12 @@ public class Visualizer {
                 }
                 else {
                     int messageInt = Integer.parseInt(message);
+
+
+                    GreetingController.dataBuffer.add(messageInt);
+                    if(GreetingController.dataBuffer.size() > 500){
+                        GreetingController.dataBuffer.remove(0);
+                    }
 
                     Visualizer.dataBuffer.add(messageInt);
                     Visualizer.dataBuffer.remove(0);

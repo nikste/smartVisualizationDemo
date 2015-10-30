@@ -74,7 +74,6 @@ public class FlinkJob {
                 } else {
                     collector.collect(s);
                 }
-
             }
 
             @Override
@@ -82,7 +81,7 @@ public class FlinkJob {
                 if(discardProbability == 0 && controlObject.changeInDiscardProbability > 0){
                     discardProbability = 0.0001;
                 }
-                discardProbability += discardProbability * controlObject.changeInDiscardProbability;
+                discardProbability = discardProbability * controlObject.changeInDiscardProbability;
                 System.out.println("changing discardProbability rate to:" + discardProbability + " changeInDiscardProbability was:" + controlObject.changeInDiscardProbability);
             }
         });
