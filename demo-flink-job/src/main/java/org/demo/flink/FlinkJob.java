@@ -59,12 +59,12 @@ public class FlinkJob {
             @Override
             public void flatMap1(String s, Collector<String> collector) throws Exception {
 
+                System.out.println("rolling da dice: P(keep) = " + passProbability);
                 if( passProbability < 1.0 ){
                     // sampling happens here
                     // Bernoulli sampling!!
                     double r = random.nextDouble();
                     //System.out.println("drawn:" + r + " discarding threshold:" + (1.0 - 1.0 / samplingRate));
-                    System.out.println("rolling da dice: P(keep) = " + passProbability);
                     if( r <= passProbability ){
                         System.out.println("keeping!");
                         collector.collect(s);
@@ -83,7 +83,8 @@ public class FlinkJob {
                 /*if(passProbability == 0 && controlObject.changeInDiscardProbability > 0){
                     discardProbability = 0.0001;
                 }*/
-                passProbability = passProbability * controlObject.changeInDiscardProbability;              //discardProbability = discardProbability * controlObject.changeInDiscardProbability;
+                //passProbability = passProbability * controlObject.changeInDiscardProbability;              //discardProbability = discardProbability * controlObject.changeInDiscardProbability;
+                passProbability = controlObject.changeInDiscardProbability;
                 System.out.println("changing passProbability rate to:" + passProbability + " changeInDiscardProbability was:" + controlObject.changeInDiscardProbability);
             }
         });

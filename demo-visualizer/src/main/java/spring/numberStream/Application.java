@@ -20,8 +20,10 @@ public class Application {
     public static Consumer dataCtrlConsumer2;
 
     public static int dataCtr = 0;
-    public static double maxDataPerSecond = 10;
+    public static double maxDataPerSecond = 100;
 
+
+    public static double remotePassProbability = 1.0;
 
 
     public static void main(String[] args) {
@@ -43,16 +45,24 @@ public class Application {
 
         for (int i = 0; i < 100000; i++) {
 
-            System.out.println("durchsatz:" + dataCtr);
-            //if (dataCtr > maxDataPerSecond) {
-            String message = Double.toString(((double) maxDataPerSecond / (double) dataCtr ));
-            System.out.println("Too much man!!, sending correction signal:" + message);
-            try {
-                dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            // does this every second
 
+
+            if(dataCtr == 0){dataCtr = 1;}
+                //System.out.println("#DataPoints = " + dataCtr);
+                //if (dataCtr > maxDataPerSecond) {
+
+
+                String message = Double.toString((remotePassProbability * (double) maxDataPerSecond / (double) dataCtr));
+                remotePassProbability = remotePassProbability * (double) maxDataPerSecond / (double) dataCtr;
+
+                System.out.println(dataCtr + "," + message);
+
+                try {
+                    dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
             // display new data
             //webstorage.content = dataBuffer.toString();
