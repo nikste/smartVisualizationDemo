@@ -52,9 +52,13 @@ public class Application {
                 //System.out.println("#DataPoints = " + dataCtr);
                 //if (dataCtr > maxDataPerSecond) {
 
+                // naive approach
+                //double newValue = (remotePassProbability * (double) maxDataPerSecond / (double) dataCtr);
+                //gradient descent
+                double newValue = 0.2;//remotePassProbability - 0.000001 * (2.0 * (double) dataCtr * (remotePassProbability * dataCtr - maxDataPerSecond));
 
-                String message = Double.toString((remotePassProbability * (double) maxDataPerSecond / (double) dataCtr));
-                remotePassProbability = remotePassProbability * (double) maxDataPerSecond / (double) dataCtr;
+                String message = Double.toString(newValue);
+                remotePassProbability = newValue;//remotePassProbability * (double) maxDataPerSecond / (double) dataCtr;
 
                 System.out.println(dataCtr + "," + message);
 
