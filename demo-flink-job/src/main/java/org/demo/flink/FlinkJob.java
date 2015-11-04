@@ -53,23 +53,25 @@ public class FlinkJob {
 
             // 1 should be amount of data that is tolerable
             //
-            double discardProbability = 0.0;
+            double passProbability = 1.0;
 
             Random random = new Random();
             @Override
             public void flatMap1(String s, Collector<String> collector) throws Exception {
 
-                if( discardProbability > 0.0 ){
+                if( passProbability < 1.0 ){
                     // sampling happens here
                     // Bernoulli sampling!!
                     double r = random.nextDouble();
                     //System.out.println("drawn:" + r + " discarding threshold:" + (1.0 - 1.0 / samplingRate));
-
-                    if( r <= discardProbability ){
+                    System.out.println("rolling da dice: P(keep) = " + passProbability);
+                    if( r <= passProbability ){
+                        System.out.println("keeping!");
+                        collector.collect(s);
+                    } else {
+                        System.out.println("discarded!");
                         //System.out.println("discarding this sample!!!");
                         // discard
-                    } else {
-                        collector.collect(s);
                     }
                 } else {
                     collector.collect(s);
@@ -78,13 +80,15 @@ public class FlinkJob {
 
             @Override
             public void flatMap2(ControlObject controlObject, Collector<String> collector) throws Exception {
-                if(discardProbability == 0 && controlObject.changeInDiscardProbability > 0){
+                /*if(passProbability == 0 && controlObject.changeInDiscardProbability > 0){
                     discardProbability = 0.0001;
-                }
-                discardProbability = discardProbability * controlObject.changeInDiscardProbability;
-                System.out.println("changing discardProbability rate to:" + discardProbability + " changeInDiscardProbability was:" + controlObject.changeInDiscardProbability);
+                }*/
+                passProbability = passProbability * controlObject.changeInDiscardProbability;              //discardProbability = discardProbability * controlObject.changeInDiscardProbability;
+                System.out.println("changing passProbability rate to:" + passProbability + " changeInDiscardProbability was:" + controlObject.changeInDiscardProbability);
             }
         });
+
+        //dataStream.print();
 
         dataStream.addSink(new RMQSink<String>("localhost", RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, new RMQTopology.StringToByteSerializer()));
         //dataStream.print();
