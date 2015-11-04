@@ -81,7 +81,7 @@ public class FakeNumberStream {
         Random randomGenerator = new Random();
         while(running){
             for (int i = 0; i < messagesPerSecond; i++) {
-                String message = "" + randomGenerator.nextInt(100) ;//+ "," + randomGenerator.nextInt(100);
+                String message = "" + (double)randomGenerator.nextGaussian();//nextInt(100)/100.0 ;//+ "," + randomGenerator.nextInt(100);
                 dataChannel.basicPublish("", DATA_QUEUE_NAME, null, message.getBytes());
             }
             try {
