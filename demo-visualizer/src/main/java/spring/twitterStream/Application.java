@@ -81,6 +81,9 @@ public class Application {
             */
 
 
+            if(FakeSpringController.stats.size() > 10){
+                FakeSpringController.stats = new ArrayList<Integer>();
+            }
             FakeSpringController.stats.add(dataBuffer.size());
 
             //FakeSpringController.aggStats.put("count",dataBuffer.size());
