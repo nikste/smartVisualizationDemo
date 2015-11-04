@@ -1,68 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<style type="text/css">
+    <meta charset="utf-8">
+    <style type="text/css">
 
-body {
-  font: 12px sans-serif;
-  text-rendering: optimizelegibility;
-}
+        body {
+        font: 12px sans-serif;
+        text-rendering: optimizelegibility;
+        }
 
-.arc path {
-    stroke: #fff;
-}
+        .arc path {
+        stroke: #fff;
+        }
 
-.aggbar {
-  margin-left: 10px;
-  font: 10px sans-serif;
-  shape-rendering: crispEdges;
-}
+        .aggbar {
+        margin-left: 10px;
+        font: 10px sans-serif;
+        shape-rendering: crispEdges;
+        }
 
-.aggbar rect {
-  stroke: white;
-  fill: steelblue;
-}
+        .aggbar rect {
+        stroke: white;
+        fill: steelblue;
+        }
 
-.aggbar text.bar {
-  fill: white;
-}
+        .aggbar text.bar {
+        fill: white;
+        }
 
-</style>
-<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    </style>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 </head>
 <body>
 <div class="container-fluid">
-  <div class="row-fluid">
-    <div class="span5">
-      <div class="row-fluid">
-        <div class="span12">
-          <p id="piemenu"><b>Field Value Counter (Pie): </b><br><select></select></p>
-          <p id="pie"></p>
+    <div class="row-fluid">
+        <div class="span5">
+            <div class="row-fluid">
+                <div class="span12">
+                    <p id="piemenu"><b>Field Value Counter (Pie): </b><br><select></select></p>
+                    <p id="pie"></p>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span12">
+                    <div id="barmenu"><b>Aggregate Counter: </b><br><select></select> </div>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span12">
+                    <p id="bar"></p>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="row-fluid">
-        <div class="span12">
-          <div id="barmenu"><b>Aggregate Counter: </b><br><select></select> </div>
+        <div class="span7">
+            <p id="bubblemenu"><b>Field Value Counter (Bubble): </b><br><select></select></p>
+            <p id="bubbles"></p>
         </div>
-      </div>
-      <div class="row-fluid">
-        <div class="span12">
-          <p id="bar"></p>
-        </div>
-      </div>
     </div>
-    <div class="span7">
-      <p id="bubblemenu"><b>Field Value Counter (Bubble): </b><br><select></select></p>
-      <p id="bubbles"></p>
-    </div>
-</div>
-<script src="js/jquery-1.10.2.min.js"></script>
-<script src="js/d3.v3.min.js"></script>
-<script src="js/fvc.js"></script>
-<script src="js/aggcount.js"></script>
-<script src="js/bootstrap.js"></script>
-<script>
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/fvc.js"></script>
+    <script src="js/aggcount.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script>
   var baseUrl = "http://localhost:9393/metrics";
 
   var barchart = aggregateCountBarChart()
@@ -90,7 +90,6 @@ body {
   function redraw() {
     var fvc = piemenu.property("value");
     if (fvc) {
-      alert(fvc);
       d3.json(baseUrl + "/field-value-counters/" + fvc)
       .get(function(error, json) {
         if (error) return console.warn(error);
@@ -151,7 +150,8 @@ body {
 
   redraw.call();
   setInterval(redraw, 2000);
+
 </script>
+</div>
 </body>
 </html>
-
