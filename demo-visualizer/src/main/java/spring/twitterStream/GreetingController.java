@@ -15,7 +15,6 @@ public class GreetingController {
 
     public static List<String> dataBuffer = new ArrayList<String>();
 
-
     @RequestMapping("/greeting")
     public String greeting(@RequestParam(value="name", defaultValue="World") String name) {
         return dataBuffer.toString();//new Greeting(0, dataBuffer.toString());

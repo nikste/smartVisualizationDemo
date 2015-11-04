@@ -91,21 +91,15 @@ public class Application {
                 String message = new String(body, "UTF-8");
                 //System.out.println(" [x] Received Data message'" + message + "'");
 
-                String[] s = message.split(",");
-                if(s.length > 1){
-                    System.out.println("has weird format.");
-                }
-                else {
-                    spring.twitterStream.GreetingController.dataBuffer.add(message);
+                spring.twitterStream.GreetingController.dataBuffer.add(message);
                     /*if(GreetingController.dataBuffer.size() > 500){
                         GreetingController.dataBuffer.remove(0);
                     }*/
 
-                    Application.dataBuffer.add(message);
-                    spring.twitterStream.Application.dataBuffer.remove(0);
+                Application.dataBuffer.add(message);
+                spring.twitterStream.Application.dataBuffer.remove(0);
 
-                    spring.twitterStream.Application.dataCtr += 1;
-                }
+                spring.twitterStream.Application.dataCtr += 1;
             }
         };
     }
