@@ -11,7 +11,12 @@ public class FieldValueAggregateController {
 
     @RequestMapping("/metrics/aggregate-counters")
     public String greeting() {
-        return "[\"tweetcount\"]";
+        return "\"links\":[\n" +
+                "    {},\n" +
+                "    {\n" +
+                "      \"rel\":\"tweetcount\",\n" +
+                "      \"href\":\"http://localhost:8080/metrics/aggrergate-counters/tweetcount\"\n" +
+                "    }]";
     }
 
     @RequestMapping("/metrics/aggregate-counters/tweetcount")

@@ -135,7 +135,7 @@
     d3.json(baseUrl + "/" + metricType)
         .get(function(error, json) {
             if (error) return console.warn(error);
-            alert(d);
+            alert(json);
             var metrics = json.content.map(function(d) {
               return d.name;
             });
