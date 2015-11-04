@@ -1,4 +1,4 @@
-package spring.twitterStream;
+/*package spring.twitterStream;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,4 +19,4 @@ public class GreetingController {
     public String greeting(@RequestParam(value="name", defaultValue="World") String name) {
         return dataBuffer.toString();//new Greeting(0, dataBuffer.toString());
     }
-}
+}*/

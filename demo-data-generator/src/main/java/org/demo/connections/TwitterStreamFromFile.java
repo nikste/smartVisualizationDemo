@@ -85,7 +85,8 @@ public class TwitterStreamFromFile {
         Random randomGenerator = new Random();
 
 
-        File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/german_tweets.json");
+        //File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/german_tweets.json");
+        File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/Germany.json");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = null;
 

@@ -131,11 +131,9 @@
   }
 
   function setMenuOptions(menu, metricType) {
-    alert("" + baseUrl + "/" + metricType);
     d3.json(baseUrl + "/" + metricType)
         .get(function(error, json) {
             if (error) return console.warn(error);
-            alert(json);
             var metrics = json.content.map(function(d) {
               return d.name;
             });

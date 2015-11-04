@@ -1,8 +1,7 @@
-package spring.twitterStream;
+package spring.twitterFakeStream;
 
 import com.rabbitmq.client.*;
 import org.demo.connections.RabbitMQQueueManager;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 @SpringBootApplication
 public class Application {
@@ -48,15 +46,15 @@ public class Application {
         for (int i = 0; i < 100000; i++) {
 
             System.out.println("durchsatz:" + dataCtr);
-            if (dataCtr > maxDataPerSecond) {
-                String message = Double.toString(((double) maxDataPerSecond / (double) dataCtr));
-                System.out.println("Too much man!!, sending correction signal:" + message);
-                try {
-                    dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            //if (dataCtr > maxDataPerSecond) {
+            //String message = Double.toString(((double) maxDataPerSecond / (double) dataCtr ));
+            //System.out.println("Too much man!!, sending correction signal:" + message);
+            /*try {
+                dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+
 
             // update stats:
 
@@ -80,41 +78,6 @@ public class Application {
             FakeSpringController.aggStats.put("tweetCount", test);
             */
 
-
-            FakeSpringController.stats.add(dataBuffer.size());
-
-            //FakeSpringController.aggStats.put("count",dataBuffer.size());
-
-            FakeSpringController.langStats = new ConcurrentHashMap<String, Integer>();
-            //FakeSpringController.stats.add(dataBuffer.size());
-            //FakeSpringController.aggStats.put("tweetCount", dataBuffer.size());
-
-            for (int j = 0; j < dataBuffer.size(); j++) {
-                JSONObject elem = dataBuffer.get(j);
-
-                // fill language statistics
-                String lang = (String) elem.get("lang");
-                Integer integer = FakeSpringController.langStats.get(lang);
-                if( integer == null){
-                    FakeSpringController.langStats.put(lang,1);
-                }else {
-                    FakeSpringController.langStats.put(lang, FakeSpringController.langStats.get(lang) + 1);
-                }
-
-                // fill hashtagStatistics
-                JSONObject entities =(JSONObject) elem.get("entities");
-                JSONArray hashtags =(JSONArray) entities.get("hashtags");
-                for (int k = 0; k < hashtags.size(); k++) {
-                    JSONObject hashtag = (JSONObject) hashtags.get(k);
-                    String hashtagtext = (String) hashtag.get("text");
-                    Integer intagar = FakeSpringController.hashStats.get(hashtagtext);
-                    if(intagar == null){
-                        FakeSpringController.hashStats.put(hashtagtext,1);
-                    }else{
-                        FakeSpringController.hashStats.put(hashtagtext,FakeSpringController.hashStats.get(hashtagtext) + 1);
-                    }
-                }
-            }
             dataCtr = 0;
 
 
