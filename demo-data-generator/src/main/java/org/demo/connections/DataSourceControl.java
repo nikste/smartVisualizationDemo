@@ -27,7 +27,7 @@ public class DataSourceControl {
         Channel dataCtrlChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);
 
         //running, numer of itemsper second
-        String message = "1,500";
+        String message = "1,100000";
         dataCtrlChannel.basicPublish("", RabbitMQQueueManager.DATACTRL_QUEUE_NAME, null, message.getBytes());
 
         dataCtrlChannel.close();
