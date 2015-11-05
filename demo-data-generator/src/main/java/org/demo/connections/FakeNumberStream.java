@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by nikste on 26.10.15.
  */
+
 public class FakeNumberStream {
 
     private static long messagesPerSecond = 500;
@@ -25,8 +26,8 @@ public class FakeNumberStream {
         Connection connection = RabbitMQQueueManager.createConnection();
 
         Channel dataChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATA_QUEUE_NAME);
-        Channel dataCtrChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);
 
+        Channel dataCtrChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);
 
         // create consumers
         createDataCtrlConsumer(dataCtrChannel, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);

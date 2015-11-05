@@ -32,18 +32,12 @@ public class Application {
 
         SpringApplication.run(Application.class, args);
 
-
-
         Connection connection = RabbitMQQueueManager.createConnection();
 
         Channel flinkDataChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
         Channel dataCtrlChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME);
 
         createDataConsumer(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
-        //createDataConsumer2(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
-
-
-        //Greeting webstorage = new Greeting(0,"0");
 
         for (int i = 0; i < 100000; i++) {
 
@@ -58,39 +52,12 @@ public class Application {
                 }
             }
 
-            // update stats:
-
-            // count different hashtags
-            // count languages
-
-            // count number of tweets arrived
-
-
-            //FakeSpringController.stats = new ArrayList<Integer>();
-
-            //FakeSpringController.aggStats = new ConcurrentHashMap<String, Integer>();
-
-
-            /*
-            ArrayList<Integer> test = FakeSpringController.aggStats.get("tweetCount");
-            if(test == null){
-                test = new ArrayList<Integer>();
-            }
-            test.add(dataBuffer.size());
-            FakeSpringController.aggStats.put("tweetCount", test);
-            */
-
-
             if(FakeSpringController.stats.size() > 10){
                 FakeSpringController.stats = new ArrayList<Integer>();
             }
             FakeSpringController.stats.add(dataBuffer.size());
 
-            //FakeSpringController.aggStats.put("count",dataBuffer.size());
-
             FakeSpringController.langStats = new ConcurrentHashMap<String, Integer>();
-            //FakeSpringController.stats.add(dataBuffer.size());
-            //FakeSpringController.aggStats.put("tweetCount", dataBuffer.size());
 
             for (int j = 0; j < dataBuffer.size(); j++) {
                 JSONObject elem = dataBuffer.get(j);
@@ -120,43 +87,8 @@ public class Application {
             }
             dataCtr = 0;
 
-
-
-
             dataBuffer = new ArrayList<JSONObject>() ;
-            //FakeSpringController.aggStats.
 
-
-            // display new data
-            //webstorage.content = dataBuffer.toString();
-
-
-            /*stats.add(random.nextInt(100));
-
-            if (stats.size() > 10) {
-                stats.remove(0);
-            }
-
-            for (int i = 0; i < stats.size(); i++) {
-                aggStats.put(Integer.toString(i), stats.get(i));
-            }
-
-
-            for (Map.Entry<String, Integer> entry : langStats.entrySet()) {
-                langStats.put(entry.getKey(), (int) Math.round(entry.getValue() * (1 + random.nextDouble())));
-            }
-
-
-            static ArrayList<Integer> stats = new ArrayList<Integer>();
-
-            static Map<String, Integer> aggStats = new ConcurrentHashMap<String, Integer>();
-
-            static Map<String, Integer> langStats = new ConcurrentHashMap<String, Integer>();
-            */
-
-
-
-            //}
             try {
                 flinkDataChannel.basicConsume(RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, true, dataConsumer);
             } catch (IOException e) {
@@ -186,14 +118,7 @@ public class Application {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
                     throws IOException {
                 String message = new String(body, "UTF-8");
-                //System.out.println(" [x] Received Data message'" + message + "'");
 
-                //spring.twitterStream.GreetingController.dataBuffer.add(message);
-
-
-                    /*if(GreetingController.dataBuffer.size() > 500){
-                        GreetingController.dataBuffer.remove(0);
-                    }*/
                 JSONParser parser = new JSONParser();
 
                 JSONObject jsonObj = null;
@@ -206,7 +131,6 @@ public class Application {
 
 
                 Application.dataBuffer.add(jsonObj);
-                //spring.twitterStream.Application.dataBuffer.remove(0);
 
                 spring.twitterStream.Application.dataCtr += 1;
             }

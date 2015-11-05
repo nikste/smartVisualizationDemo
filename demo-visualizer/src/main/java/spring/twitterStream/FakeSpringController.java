@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,32 +48,6 @@ public class FakeSpringController {
         return new Holder(Lists.newArrayList(new Metric("intervals")));
     }
 
-
-
-   /* @Scheduled(fixedDelay = 2000)
-    private void updateStats() {
-        // get stats for the last X
-        stats.add(random.nextInt(100));
-
-        if (stats.size() > 10) {
-            stats.remove(0);
-        }
-
-        for (int i = 0; i < stats.size(); i++) {
-            aggStats.put(Integer.toString(i), stats.get(i));
-        }
-
-
-        for (Map.Entry<String, Integer> entry : langStats.entrySet()) {
-            langStats.put(entry.getKey(), (int) Math.round(entry.getValue() * (1 + random.nextDouble())));
-        }
-    }*/
-
-   /* @RequestMapping("/metrics/aggregate-counters/{id}")
-    public static Counts aggregate(@PathVariable String id) {
-
-        return new Counts(aggStats);
-    }*/
     @RequestMapping("/metrics/aggregate-counters/intervals")
     public static String aggregate(){
         //TODO: Dirty hack!
@@ -108,16 +81,15 @@ public class FakeSpringController {
         }
     }
 
-    @PostConstruct
-    public void init() {
-        langStats.put("one", 1);
-        langStats.put("two", 1);
-        langStats.put("three", 1);
-        langStats.put("four", 1);
-        langStats.put("dfki", 1);
-        langStats.put("tu", 1);
-        langStats.put("streaming", 1);
-    }
-
+//    @PostConstruct
+//    public void init() {
+//        langStats.put("one", 1);
+//        langStats.put("two", 1);
+//        langStats.put("three", 1);
+//        langStats.put("four", 1);
+//        langStats.put("dfki", 1);
+//        langStats.put("tu", 1);
+//        langStats.put("streaming", 1);
+//    }
 
 }

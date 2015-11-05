@@ -21,16 +21,11 @@ public class TwitterStreamFromFile {
     public static Consumer dataCtrlConsumer = null;
 
     public static void main(String[] args){
-
         System.out.println("started");
-
         System.out.println("initializing Connection");
-
         Connection connection = RabbitMQQueueManager.createConnection();
-
         Channel dataChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATA_QUEUE_NAME);
         Channel dataCtrChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);
-
 
         // create consumers
         createDataCtrlConsumer(dataCtrChannel, RabbitMQQueueManager.DATACTRL_QUEUE_NAME);
@@ -84,17 +79,11 @@ public class TwitterStreamFromFile {
     private static void sendMessages(Channel dataChannel, String DATA_QUEUE_NAME, Channel dataGeneratorCtrlChannel, String CONTROL_QUEUE_NAME) throws IOException {
         Random randomGenerator = new Random();
 
-
-        //File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/german_tweets.json");
         File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/Germany.json");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = null;
 
-
-
-
         // load file
-
         while(running){
             for (int i = 0; i < messagesPerSecond; i++) {
 
@@ -103,19 +92,15 @@ public class TwitterStreamFromFile {
                 if(null == line) {
                     br.close();
                     br = new BufferedReader(new FileReader(file));
-               }
+                }
                 String message = line;//"" + randomGenerator.nextInt(100);//+ "," + randomGenerator.nextInt(100);
                 dataChannel.basicPublish("", DATA_QUEUE_NAME, null, message.getBytes());
-
             }
             try {
-
                 Thread.sleep(1000);
                 System.out.println("sending " + messagesPerSecond);
-
                 System.out.println("last message was:" + line);
                 dataGeneratorCtrlChannel.basicConsume(CONTROL_QUEUE_NAME, true, dataCtrlConsumer);
-
                 System.out.println(" ");
                 System.out.println("parameters:");
                 System.out.println("messages/s: " + messagesPerSecond);

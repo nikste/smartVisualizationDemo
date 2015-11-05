@@ -31,12 +31,8 @@ public class FlinkJob {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-
         // init data source
         DataStream<String> data = env.addSource(new RMQSource<String>("localhost", RabbitMQQueueManager.DATA_QUEUE_NAME, new SimpleStringSchema()));
-
-
         // init control source
         DataStream<String> control = env.addSource(new RMQSource<String>("localhost", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, new SimpleStringSchema()));
         DataStream<ControlObject> controlObjects = control.map(new MapFunction<String, ControlObject>() {
@@ -46,13 +42,10 @@ public class FlinkJob {
             }
         });
 
-
         ConnectedStreams<String, ControlObject> fullStream = data.connect(controlObjects);
 
         DataStream<String> dataStream = fullStream.flatMap(new CoFlatMapFunction<String, ControlObject, String>() {
-
-            // 1 should be amount of data that is tolerable
-            //
+            // amount of data that is tolerable
             double passProbability = 1.0;
 
             Random random = new Random();
@@ -64,14 +57,11 @@ public class FlinkJob {
                     // sampling happens here
                     // Bernoulli sampling!!
                     double r = random.nextDouble();
-                    //System.out.println("drawn:" + r + " discarding threshold:" + (1.0 - 1.0 / samplingRate));
                     if( r <= passProbability ){
                         System.out.println("keeping!");
                         collector.collect(s);
                     } else {
                         System.out.println("discarded!");
-                        //System.out.println("discarding this sample!!!");
-                        // discard
                     }
                 } else {
                     collector.collect(s);
@@ -80,19 +70,15 @@ public class FlinkJob {
 
             @Override
             public void flatMap2(ControlObject controlObject, Collector<String> collector) throws Exception {
-                /*if(passProbability == 0 && controlObject.changeInDiscardProbability > 0){
-                    discardProbability = 0.0001;
-                }*/
+
                 //passProbability = passProbability * controlObject.changeInDiscardProbability;              //discardProbability = discardProbability * controlObject.changeInDiscardProbability;
                 passProbability = controlObject.changeInDiscardProbability;
                 System.out.println("changing passProbability rate to:" + passProbability + " changeInDiscardProbability was:" + controlObject.changeInDiscardProbability);
             }
         });
 
-        //dataStream.print();
-
         dataStream.addSink(new RMQSink<String>("localhost", RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, new RMQTopology.StringToByteSerializer()));
-        //dataStream.print();
+
         env.execute();
     }
 }
