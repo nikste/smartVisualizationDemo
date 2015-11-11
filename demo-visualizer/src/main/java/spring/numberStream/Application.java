@@ -8,15 +8,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootApplication
 public class Application {
 
 
+    //TODO: make thread safe?
     private static List<Double> dataBuffer = new ArrayList<Double>();
     private static Consumer dataConsumer;
 
-    public static int dataCtr = 0;
+    public static AtomicInteger dataCtr = new AtomicInteger(0);
     public static double remotePassProbability = 1.0;
 
     public static void main(String[] args) {
@@ -27,10 +29,18 @@ public class Application {
         Channel dataCtrlChannel = RabbitMQQueueManager.createChannel(connection, RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME);
         createDataConsumer(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
 
+
+        try {
+            flinkDataChannel.basicConsume(RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, true, dataConsumer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         for (int i = 0; i < 100000; i++) {
 
             // does this every second
-            if(dataCtr == 0){dataCtr = 1;}
+            int localDataCtr = dataCtr.getAndSet(0);
+            if(localDataCtr == 0){localDataCtr = 1;}
 
             //gradient descent
             double newValue = 0.2;//remotePassProbability - 0.000001 * (2.0 * (double) dataCtr * (remotePassProbability * dataCtr - maxDataPerSecond));
@@ -38,7 +48,7 @@ public class Application {
             String message = Double.toString(newValue);
             remotePassProbability = newValue;//remotePassProbability * (double) maxDataPerSecond / (double) dataCtr;
 
-            System.out.println(dataCtr + "," + message);
+            System.out.println(localDataCtr + "," + message);
 
             try {
                 dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
@@ -46,12 +56,7 @@ public class Application {
                 e.printStackTrace();
             }
 
-            dataCtr = 0;
-            try {
-                flinkDataChannel.basicConsume(RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, true, dataConsumer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -77,18 +82,18 @@ public class Application {
 
                 String[] s = message.split(",");
                 if(s.length > 1){
-                    System.out.println("has weird format.");
+                    System.out.println("has weird format." + message);
                 }
-                else {
+                    else {
                     double messageInt = Double.parseDouble(message);
 
-                    GreetingController.dataBuffer.add(messageInt);
+                    //GreetingController.dataBuffer.add(messageInt);
 
                     Application.dataBuffer.add(messageInt);
 
                     Application.dataBuffer.remove(0);
 
-                    Application.dataCtr += 1;
+                    Application.dataCtr.incrementAndGet();
                 }
             }
         };

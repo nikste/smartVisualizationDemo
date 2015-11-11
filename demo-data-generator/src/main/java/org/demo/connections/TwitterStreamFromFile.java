@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class TwitterStreamFromFile {
 
 
-    private static long messagesPerSecond = 500;
+    private static long messagesPerSecond = (int)(1000.0/10.0);
     public static boolean running = true;
 
     public static Consumer dataCtrlConsumer = null;
@@ -92,12 +92,13 @@ public class TwitterStreamFromFile {
                 if(null == line) {
                     br.close();
                     br = new BufferedReader(new FileReader(file));
+                    line = br.readLine();
                 }
                 String message = line;//"" + randomGenerator.nextInt(100);//+ "," + randomGenerator.nextInt(100);
                 dataChannel.basicPublish("", DATA_QUEUE_NAME, null, message.getBytes());
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 System.out.println("sending " + messagesPerSecond);
                 System.out.println("last message was:" + line);
                 dataGeneratorCtrlChannel.basicConsume(CONTROL_QUEUE_NAME, true, dataCtrlConsumer);

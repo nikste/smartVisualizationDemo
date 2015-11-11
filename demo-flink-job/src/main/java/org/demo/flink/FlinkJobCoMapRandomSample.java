@@ -11,13 +11,17 @@ import org.apache.flink.streaming.connectors.rabbitmq.RMQTopology;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
 import org.apache.flink.util.Collector;
 import org.demo.connections.RabbitMQQueueManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
 /**
  * Created by nikste on 29.10.15.
  */
-public class FlinkJob {
+public class FlinkJobCoMapRandomSample {
+
+    static Logger log  = LoggerFactory.getLogger(FlinkJobCoMapRandomSample.class);
 
     static class ControlObject{
         public ControlObject(double samplingRate) {
@@ -28,9 +32,12 @@ public class FlinkJob {
     }
 
 
+    public static Random random = new Random();
+
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
         // init data source
         DataStream<String> data = env.addSource(new RMQSource<String>("localhost", RabbitMQQueueManager.DATA_QUEUE_NAME, new SimpleStringSchema()));
         // init control source
@@ -38,6 +45,7 @@ public class FlinkJob {
         DataStream<ControlObject> controlObjects = control.map(new MapFunction<String, ControlObject>() {
             @Override
             public ControlObject map(String s) throws Exception {
+                System.out.println("got new information:" + s);
                 return new ControlObject(Double.parseDouble(s));
             }
         });
@@ -48,20 +56,19 @@ public class FlinkJob {
             // amount of data that is tolerable
             double passProbability = 1.0;
 
-            Random random = new Random();
             @Override
             public void flatMap1(String s, Collector<String> collector) throws Exception {
 
-                System.out.println("rolling da dice: P(keep) = " + passProbability);
-                if( passProbability < 1.0 ){
+                if (passProbability < 1.0) {
                     // sampling happens here
                     // Bernoulli sampling!!
                     double r = random.nextDouble();
-                    if( r <= passProbability ){
-                        System.out.println("keeping!");
+                    System.out.println(r);
+                    if (r <= passProbability) {
+                        //System.out.println("keeping!");
                         collector.collect(s);
                     } else {
-                        System.out.println("discarded!");
+                        //System.out.println("discarded!");
                     }
                 } else {
                     collector.collect(s);

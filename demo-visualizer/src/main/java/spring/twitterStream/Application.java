@@ -5,32 +5,44 @@ import org.demo.connections.RabbitMQQueueManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 @SpringBootApplication
+@EnableScheduling
 public class Application {
-
+    static Logger log  = LoggerFactory.getLogger(Application.class);
 
     private static List<JSONObject> dataBuffer = new ArrayList<JSONObject>();
-    private static Connection connection;
     private static Consumer dataConsumer;
 
-    public static Consumer dataCtrlConsumer2;
-
-    public static int dataCtr = 0;
+    public static AtomicInteger dataCtr = new AtomicInteger();
     public static double maxDataPerSecond = 10;
 
+    public static double remotePassProbability = 1.0;
+    
+    private static ArrayList<Integer> lastDataCtrs = new ArrayList<Integer>();
 
+    // for running average
+    public static int intermediateDatactr = 0;
 
     public static void main(String[] args) {
 
-        SpringApplication.run(Application.class, args);
+        ConfigurableApplicationContext applicationContext = SpringApplication.run(Application.class, args);
+
+//        FakeSpringController fakeSpringController = applicationContext.getBean(FakeSpringController.class);
+        Hashmapbuttler fakeSpringController = applicationContext.getBean(Hashmapbuttler.class);
 
         Connection connection = RabbitMQQueueManager.createConnection();
 
@@ -39,36 +51,87 @@ public class Application {
 
         createDataConsumer(flinkDataChannel, RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME);
 
-        for (int i = 0; i < 100000; i++) {
+        int correctionCounter = 0;
 
-            System.out.println("durchsatz:" + dataCtr);
-            if (dataCtr > maxDataPerSecond) {
-                String message = Double.toString(((double) maxDataPerSecond / (double) dataCtr));
-                System.out.println("Too much man!!, sending correction signal:" + message);
+        try {
+            flinkDataChannel.basicConsume(RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, true, dataConsumer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < 10000; i++) {
+
+            System.out.println("durchsatz:" + dataCtr.get());
+
+            // remember last values
+            lastDataCtrs.add(dataCtr.get());
+
+            // actually last 5
+            if(lastDataCtrs.size() > 5){
+                lastDataCtrs.remove(0);
+            }
+
+            // comput variance
+            double avrg = 0;
+            for (int j = 0; j < lastDataCtrs.size(); j++) {
+                Integer integer = lastDataCtrs.get(j);
+                avrg += integer;
+            }
+
+            avrg = avrg / lastDataCtrs.size();
+
+            double variance = 0;
+            for (int j = 0; j < lastDataCtrs.size(); j++) {
+                Integer integer = lastDataCtrs.get(j);
+                variance += (integer - avrg) * (integer - avrg);
+            }
+
+            ArrayList<Integer> gradients = new ArrayList<Integer>();
+            for (int j = 1; j < lastDataCtrs.size(); j++) {
+                gradients.add(lastDataCtrs.get(j - 1) - lastDataCtrs.get(j));
+            }
+
+            System.out.println("rPP:" + remotePassProbability + " dataCtr:" + avrg);
+
+            if(dataCtr.get() == 0){dataCtr.set(1);}
+            if(correctionCounter >= 5) {
+                double correctionTerm = maxDataPerSecond / (double) avrg;
+                remotePassProbability = remotePassProbability * correctionTerm;
+
+                //String message = Double.toString(remotePassProbability);
+
+                String message = Double.toString(1.0);
+
+                System.out.println("avrg:" + avrg + " sending correction signal:" + message + " maximum:" + maxDataPerSecond);
                 try {
-                    dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
+                    for (int j = 0; j < 100; j++) {
+                        dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                correctionCounter = 0;
+            }
+            correctionCounter ++;
+
+            fakeSpringController.stats.add(dataBuffer.size());
+
+            if(fakeSpringController.stats.size() > 20){
+                fakeSpringController.stats.remove(0);
             }
 
-            if(FakeSpringController.stats.size() > 10){
-                FakeSpringController.stats = new ArrayList<Integer>();
-            }
-            FakeSpringController.stats.add(dataBuffer.size());
-
-            FakeSpringController.langStats = new ConcurrentHashMap<String, Integer>();
+            fakeSpringController.langStats = new ConcurrentHashMap<String, Integer>();
 
             for (int j = 0; j < dataBuffer.size(); j++) {
                 JSONObject elem = dataBuffer.get(j);
 
                 // fill language statistics
                 String lang = (String) elem.get("lang");
-                Integer integer = FakeSpringController.langStats.get(lang);
+                Integer integer = fakeSpringController.langStats.get(lang);
                 if( integer == null){
-                    FakeSpringController.langStats.put(lang,1);
+                    fakeSpringController.langStats.put(lang,1);
                 }else {
-                    FakeSpringController.langStats.put(lang, FakeSpringController.langStats.get(lang) + 1);
+                    fakeSpringController.langStats.put(lang, fakeSpringController.langStats.get(lang) + 1);
                 }
 
                 // fill hashtagStatistics
@@ -77,35 +140,28 @@ public class Application {
                 for (int k = 0; k < hashtags.size(); k++) {
                     JSONObject hashtag = (JSONObject) hashtags.get(k);
                     String hashtagtext = (String) hashtag.get("text");
-                    Integer intagar = FakeSpringController.hashStats.get(hashtagtext);
+                    Integer intagar = fakeSpringController.hashStats.get(hashtagtext);
                     if(intagar == null){
-                        FakeSpringController.hashStats.put(hashtagtext,1);
+                        fakeSpringController.hashStats.put(hashtagtext,1);
                     }else{
-                        FakeSpringController.hashStats.put(hashtagtext,FakeSpringController.hashStats.get(hashtagtext) + 1);
+                        fakeSpringController.hashStats.put(hashtagtext,fakeSpringController.hashStats.get(hashtagtext) + 1);
                     }
                 }
             }
-            dataCtr = 0;
+
+            dataCtr.set(0);
 
             dataBuffer = new ArrayList<JSONObject>() ;
 
             try {
-                flinkDataChannel.basicConsume(RabbitMQQueueManager.FLINK_DATA_QUEUE_NAME, true, dataConsumer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
         }
     }
-
-
-
-
+    
     private static void createDataConsumer(Channel dataGeneratorCtrlChannel, String QUEUE_NAME) {
         System.out.println("declaring:" + QUEUE_NAME);
         try {
@@ -129,10 +185,9 @@ public class Application {
                     e.printStackTrace();
                 }
 
-
                 Application.dataBuffer.add(jsonObj);
 
-                spring.twitterStream.Application.dataCtr += 1;
+                dataCtr.getAndIncrement();
             }
         };
     }

@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by joki02 on 04.11.2015.
@@ -18,23 +18,23 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController()
 public class FakeSpringController {
 
-    static Random random = new Random(42);
+    Random random = new Random(42);
 
-    static ArrayList<Integer> stats = new ArrayList<Integer>();
+    CopyOnWriteArrayList<Integer> stats = new CopyOnWriteArrayList<Integer>();
 
-    static Map<String, Integer> aggStats = new ConcurrentHashMap<String, Integer>();
+    Map<String, Integer> aggStats = new ConcurrentHashMap<String, Integer>();
 
 
-    static Map<String, Integer> hashStats = new ConcurrentHashMap<String, Integer>();
-    static Map<String, Integer> langStats = new ConcurrentHashMap<String, Integer>();
+    Map<String, Integer> hashStats = new ConcurrentHashMap<String, Integer>();
+    Map<String, Integer> langStats = new ConcurrentHashMap<String, Integer>();
 
     @RequestMapping("/metrics/field-value-counters")
-    public static Holder fvc() {
+    public Holder fvc() {
         return new Holder(Lists.newArrayList(new Metric("languageStats"),new Metric("hashtagStats")));
     }
 
     @RequestMapping("/metrics/field-value-counters/{id}")
-    public static Counts counter(@PathVariable String id) {
+    public Counts counter(@PathVariable String id) {
 
         if(id.equals("languageStats")) {
             return new Counts(langStats);
@@ -44,18 +44,18 @@ public class FakeSpringController {
     }
 
     @RequestMapping("/metrics/aggregate-counters")
-    public static Holder aggc() {
+    public Holder aggc() {
         return new Holder(Lists.newArrayList(new Metric("intervals")));
     }
 
     @RequestMapping("/metrics/aggregate-counters/intervals")
-    public static String aggregate(){
+    public String aggregate(){
         //TODO: Dirty hack!
         return "{\"counts\":" + stats.toString() + "}";
     }
 
 
-    private static class Counts {
+    private class Counts {
         public Map<String, Integer> counts;
 
         public Counts(Map<String, Integer> counts) {
@@ -64,7 +64,7 @@ public class FakeSpringController {
     }
 
 
-    private static class Holder {
+    private class Holder {
         public List<Metric> content;
 
         public Holder(List<Metric> content) {
@@ -73,7 +73,7 @@ public class FakeSpringController {
     }
 
 
-    private static class Metric {
+    private class Metric {
         public String name;
 
         public Metric(String name) {

@@ -83,7 +83,7 @@ public class Application {
 
                 Application.dataBuffer.add(jsonObj);
 
-                spring.twitterStream.Application.dataCtr += 1;
+                dataCtr ++ ;
             }
         };
     }
