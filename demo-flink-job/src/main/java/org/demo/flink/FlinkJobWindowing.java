@@ -90,10 +90,10 @@ public class FlinkJobWindowing {
                                 if (next.f0 == 1) {
                                     continue;
                                 }
-                                if (counter < 500 ) {
+                                //if (counter < 500 ) {
                                     out.collect(next.f1);
                                     counter++;
-                                }
+                                //}
                             }
                             log.debug("triggered in :{} sent {}", new Date(), counter);
                             // count all elements

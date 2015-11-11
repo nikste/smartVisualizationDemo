@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class TwitterStreamFromFile {
 
 
-    private static long messagesPerSecond = (int)(1000.0/10.0);
+    private static long messagesPerSecond = (int)(10.0/10.0);
     public static boolean running = true;
 
     public static Consumer dataCtrlConsumer = null;

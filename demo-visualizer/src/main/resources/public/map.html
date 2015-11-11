@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Testmap</title>
+    <meta charset="utf-8" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.6.1/leaflet.js"></script>
+    <style>
+        @import url(http://cdn.leafletjs.com/leaflet-0.6.1/leaflet.css);
+    </style>
+    <script src="js/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+<div id="map" style="width: 960px; height: 960px"></div>
+<script>
+
+
+
+
+
+  var map = L.map('map').setView([52.52,13.384], 5);
+  var toolserver = L.tileLayer('http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png');
+  var stamen = L.tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {attribution: 'Add some attributes here!'}).addTo(map);
+  var baseLayers = {"stamen": stamen, "toolserver-mapnik":toolserver};
+
+
+var geojson = new L.FeatureGroup();
+  // Read the GeoJSON data with jQuery, and create a circleMarker element for each tweet
+// Each tweet will be represented by a nice red dot
+$.getJSON("http://localhost:8080/geo_data", function(data) {
+        var myStyle = {
+            radius: 5,
+            fillColor: "red",
+            color: "red",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        };
+
+        geojson = L.geoJson(data, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, myStyle);
+            }
+        });
+        geojson.addTo(map)
+    });
+
+
+
+
+function redraw(){
+    // clear old data
+    map.removeLayer(geojson);
+
+    $.getJSON("http://localhost:8080/geo_data", function(data) {
+        var myStyle = {
+            radius: 5,
+            fillColor: "red",
+            color: "red",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        };
+
+        geojson = L.geoJson(data, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, myStyle);
+            }
+        });
+        geojson.addTo(map)
+    });
+}
+  L.control.layers(baseLayers).addTo(map);
+
+  redraw.call();
+  setInterval(redraw, 2000);
+
+
+  function getAndDeleteAllMarkers() {
+/*
+    var allMarkersObjArray = [];//new Array();
+    var allMarkersGeoJsonArray = [];//new Array();
+
+    $.each(map._layers, function (ml) {
+        //console.log(map._layers)
+        if (map._layers[ml].feature) {
+
+            allMarkersObjArray.push(this)
+                                    allMarkersGeoJsonArray.push(JSON.stringify(this.toGeoJSON()))
+        }
+    })*/
+  }
+  </script>
+</body>
+</html>

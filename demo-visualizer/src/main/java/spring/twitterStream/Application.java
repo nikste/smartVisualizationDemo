@@ -1,5 +1,6 @@
 package spring.twitterStream;
 
+import com.google.common.base.MoreObjects;
 import com.rabbitmq.client.*;
 import org.demo.connections.RabbitMQQueueManager;
 import org.json.simple.JSONArray;
@@ -11,6 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import spring.domain.GeoJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,7 +128,9 @@ public class Application {
                 JSONObject elem = dataBuffer.get(j);
 
                 // fill language statistics
-                String lang = (String) elem.get("lang");
+                String lang = MoreObjects.firstNonNull((String) elem.get("lang"), "de");
+                //TODO: was null once
+
                 Integer integer = fakeSpringController.langStats.get(lang);
                 if( integer == null){
                     fakeSpringController.langStats.put(lang,1);
@@ -147,12 +151,33 @@ public class Application {
                         fakeSpringController.hashStats.put(hashtagtext,fakeSpringController.hashStats.get(hashtagtext) + 1);
                     }
                 }
+
+                //fill location statistics
+//                int c = 0;
+                JSONObject coordinates = (JSONObject) elem.get("coordinates");
+                if(coordinates != null){
+                    JSONArray coordinates1 = (JSONArray) coordinates.get("coordinates");
+//                    System.out.println("lat " + coordinates1.get(0));
+//                    System.out.println("lon " + coordinates1.get(1));
+                    double lat = Double.valueOf(coordinates1.get(0).toString());
+                    double lon = Double.valueOf(coordinates1.get(1).toString());
+                    List<Double> coordinateList = new ArrayList<Double>();
+                    coordinateList.add(lat);
+                    coordinateList.add(lon);
+
+                    String text = (String) elem.get("text");
+
+                    fakeSpringController.featureCollection.features.add(new GeoJson(coordinateList, text));
+//                    c++;
+                }
+//                System.out.println("found " + c + " elements with geo encoding");
             }
 
             dataCtr.set(0);
 
             dataBuffer = new ArrayList<JSONObject>() ;
 
+//            System.out.println("geo encoding lenght: " + fakeSpringController.featureCollection.features.size());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

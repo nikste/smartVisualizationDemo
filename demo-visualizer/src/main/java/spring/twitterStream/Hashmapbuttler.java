@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import spring.domain.FeatureCollection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +21,8 @@ public class Hashmapbuttler {
     CopyOnWriteArrayList<Integer> stats = new CopyOnWriteArrayList<Integer>();
     Map<String, Integer> hashStats = new ConcurrentHashMap<String, Integer>();
     Map<String, Integer> langStats = new ConcurrentHashMap<String, Integer>();
+
+    FeatureCollection featureCollection = new FeatureCollection();
 
     @Autowired
     FakeSpringController fakeSpringController;
@@ -38,5 +41,10 @@ public class Hashmapbuttler {
         fakeSpringController.langStats.putAll(langStats);
         langStats.clear();
         //TODO: implement counter here (#elements,time)
+
+        fakeSpringController.featureCollection.features.clear();
+        fakeSpringController.featureCollection.features.addAll(featureCollection.features);
+
+        featureCollection.features.clear();
     }
 }

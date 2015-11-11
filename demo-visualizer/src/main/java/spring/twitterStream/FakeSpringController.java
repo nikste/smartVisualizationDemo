@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import spring.domain.FeatureCollection;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,9 @@ public class FakeSpringController {
 
     Map<String, Integer> hashStats = new ConcurrentHashMap<String, Integer>();
     Map<String, Integer> langStats = new ConcurrentHashMap<String, Integer>();
+
+    FeatureCollection featureCollection = new FeatureCollection();
+
 
     @RequestMapping("/metrics/field-value-counters")
     public Holder fvc() {
@@ -52,6 +56,11 @@ public class FakeSpringController {
     public String aggregate(){
         //TODO: Dirty hack!
         return "{\"counts\":" + stats.toString() + "}";
+    }
+
+    @RequestMapping("/geo_data")
+    public FeatureCollection geojsons(){
+        return featureCollection;
     }
 
 
