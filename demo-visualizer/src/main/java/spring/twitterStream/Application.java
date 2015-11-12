@@ -36,14 +36,10 @@ public class Application {
     
     private static ArrayList<Integer> lastDataCtrs = new ArrayList<Integer>();
 
-    // for running average
-    public static int intermediateDatactr = 0;
-
     public static void main(String[] args) {
 
         ConfigurableApplicationContext applicationContext = SpringApplication.run(Application.class, args);
 
-//        FakeSpringController fakeSpringController = applicationContext.getBean(FakeSpringController.class);
         Hashmapbuttler fakeSpringController = applicationContext.getBean(Hashmapbuttler.class);
 
         Connection connection = RabbitMQQueueManager.createConnection();
@@ -63,7 +59,6 @@ public class Application {
 
         for (int i = 0; i < 10000; i++) {
 
-            System.out.println("durchsatz:" + dataCtr.get());
 
             // remember last values
             lastDataCtrs.add(dataCtr.get());
@@ -93,21 +88,44 @@ public class Application {
                 gradients.add(lastDataCtrs.get(j - 1) - lastDataCtrs.get(j));
             }
 
-            System.out.println("rPP:" + remotePassProbability + " dataCtr:" + avrg);
 
             if(dataCtr.get() == 0){dataCtr.set(1);}
 
             // TODO: send feedback via bounding box
-//            System.out.println(fakeSpringController.fakeSpringController.currentBox);
 
+
+            if(!(fakeSpringController.fakeSpringController.currentBox.getNeLat() == 0.0 &&
+                    fakeSpringController.fakeSpringController.currentBox.getNeLng() == 0.0 &&
+                    fakeSpringController.fakeSpringController.currentBox.getSwLat() == 0.0 &&
+                    fakeSpringController.fakeSpringController.currentBox.getSwLng() == 0.0 ))
+            {
+                String messageBoundingBox = "1,";
+
+                messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getNeLat() + ",";
+                messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getNeLng() + ",";
+                messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getSwLat() + ",";
+                messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getSwLng() ;
+
+                System.out.println("sending bounding box:" + fakeSpringController.fakeSpringController.currentBox + "  message = " + messageBoundingBox);
+//                log.debug("sending new bounding box:{}",messageBoundingBox);
+                // send info bounding box:
+                for (int j = 0; j < 100; j++) {
+                    try {
+                        dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, messageBoundingBox.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
             if(correctionCounter >= 5) {
+
+                // amount of data reduction
                 double correctionTerm = maxDataPerSecond / (double) avrg;
                 remotePassProbability = remotePassProbability * correctionTerm;
 
-                String message = Double.toString(1.0);
+                String message = "0" + Double.toString(1.0);
 
-                System.out.println("avrg:" + avrg + " sending correction signal:" + message + " maximum:" + maxDataPerSecond);
                 try {
                     for (int j = 0; j < 100; j++) {
                         dataCtrlChannel.basicPublish("", RabbitMQQueueManager.FLINK_DATACTRL_QUEUE_NAME, null, message.getBytes());
@@ -157,12 +175,9 @@ public class Application {
                 }
 
                 //fill location statistics
-//                int c = 0;
                 JSONObject coordinates = (JSONObject) elem.get("coordinates");
                 if(coordinates != null){
                     JSONArray coordinates1 = (JSONArray) coordinates.get("coordinates");
-//                    System.out.println("lat " + coordinates1.get(0));
-//                    System.out.println("lon " + coordinates1.get(1));
                     double lat = Double.valueOf(coordinates1.get(0).toString());
                     double lon = Double.valueOf(coordinates1.get(1).toString());
                     List<Double> coordinateList = new ArrayList<Double>();
@@ -172,16 +187,12 @@ public class Application {
                     String text = (String) elem.get("text");
 
                     fakeSpringController.featureCollection.features.add(new GeoJson(coordinateList, text));
-//                    c++;
                 }
-//                System.out.println("found " + c + " elements with geo encoding");
             }
 
             dataCtr.set(0);
 
             dataBuffer = new ArrayList<JSONObject>() ;
-
-//            System.out.println("geo encoding lenght: " + fakeSpringController.featureCollection.features.size());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -192,7 +203,6 @@ public class Application {
     }
     
     private static void createDataConsumer(Channel dataGeneratorCtrlChannel, String QUEUE_NAME) {
-        System.out.println("declaring:" + QUEUE_NAME);
         try {
             dataGeneratorCtrlChannel.queueDeclare(QUEUE_NAME, false, false, false, null);
         } catch (IOException e) {

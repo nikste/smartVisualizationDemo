@@ -76,7 +76,6 @@ public class FakeSpringController {
 
     @RequestMapping(value = "/feedback",  method = RequestMethod.PUT)
     public void setFeedback(@RequestBody BoundingBox box){ //@ModelAttribute //@RequestBody
-        System.out.println(box);
         log.debug("got new data {}", box);
         currentBox = box;
     }
