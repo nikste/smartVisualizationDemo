@@ -63,8 +63,7 @@ function redraw(){
         url: 'http://localhost:8080/feedback/',
         type: 'PUT',
         contentType : 'application/json',
-        data: payLoadJson//, // or $('#myform').serializeArray()
-        //success: function() { alert('PUT completed' + payLoad.neLat + ' ' + payLoad.neLng + ' ' + payLoad.swLat + ' ' + payLoad.swLng); }
+        data: payLoadJson
     });
 
     // clear old data

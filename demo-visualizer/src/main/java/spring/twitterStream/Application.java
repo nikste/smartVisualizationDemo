@@ -105,8 +105,6 @@ public class Application {
                 double correctionTerm = maxDataPerSecond / (double) avrg;
                 remotePassProbability = remotePassProbability * correctionTerm;
 
-                //String message = Double.toString(remotePassProbability);
-
                 String message = Double.toString(1.0);
 
                 System.out.println("avrg:" + avrg + " sending correction signal:" + message + " maximum:" + maxDataPerSecond);
