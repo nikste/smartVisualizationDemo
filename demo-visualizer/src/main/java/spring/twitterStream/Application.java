@@ -96,6 +96,11 @@ public class Application {
             System.out.println("rPP:" + remotePassProbability + " dataCtr:" + avrg);
 
             if(dataCtr.get() == 0){dataCtr.set(1);}
+
+            // TODO: send feedback via bounding box
+//            System.out.println(fakeSpringController.fakeSpringController.currentBox);
+
+
             if(correctionCounter >= 5) {
                 double correctionTerm = maxDataPerSecond / (double) avrg;
                 remotePassProbability = remotePassProbability * correctionTerm;

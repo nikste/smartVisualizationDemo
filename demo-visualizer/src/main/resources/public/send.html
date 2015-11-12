@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+
+<script>
+
+    var ws = new SockJS('http://127.0.0.1:15674/stomp');
+    var client = Stomp.over(ws);
+
+    var on_connect = function() {
+            console.log('connected');
+        };
+        var on_error =  function() {
+            console.log('error');
+        };
+        client.connect('guest', 'guest', on_connect, on_error, '/');
+        //wait(10);
+        client.send('test' ,{}, 'testmessage');
+
+</script>
+</body>
+</html>

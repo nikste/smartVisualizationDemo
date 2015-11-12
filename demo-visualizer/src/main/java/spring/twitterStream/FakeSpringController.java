@@ -2,9 +2,10 @@ package spring.twitterStream;
 
 
 import com.google.common.collect.Lists;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
+import spring.domain.BoundingBox;
 import spring.domain.FeatureCollection;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @RestController()
 public class FakeSpringController {
+    static Logger log  = LoggerFactory.getLogger(FakeSpringController.class);
 
     Random random = new Random(42);
 
@@ -31,6 +33,15 @@ public class FakeSpringController {
 
     FeatureCollection featureCollection = new FeatureCollection();
 
+    //List<Double> coordinates = Lists.newArrayList(52.52,13.384,52.33,12.3);
+    /* new ArrayList<Double>() {{
+        add(52.52);
+        add(13.384);
+        add(52.33);
+        add(12.3);
+    }};*/
+
+    BoundingBox currentBox = new BoundingBox();
 
     @RequestMapping("/metrics/field-value-counters")
     public Holder fvc() {
@@ -63,6 +74,12 @@ public class FakeSpringController {
         return featureCollection;
     }
 
+    @RequestMapping(value = "/feedback",  method = RequestMethod.PUT)
+    public void setFeedback(@RequestBody BoundingBox box){ //@ModelAttribute //@RequestBody
+        System.out.println(box);
+        log.debug("got new data {}", box);
+        currentBox = box;
+    }
 
     private class Counts {
         public Map<String, Integer> counts;

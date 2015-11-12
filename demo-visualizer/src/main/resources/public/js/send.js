@@ -12,3 +12,4 @@
             console.log('error');
         };
         client.connect('guest', 'guest', on_connect, on_error, '/');
+        </script>

@@ -9,14 +9,11 @@
     </style>
     <script src="js/jquery-1.10.2.min.js"></script>
 
-    <script src="js/send.js"></script>
+    <!--<script src="js/send.js"></script>-->
 </head>
 <body>
 <div id="map" style="width: 960px; height: 960px"></div>
 <script>
-
-
-
 
 
   var map = L.map('map').setView([52.52,13.384], 5);
@@ -50,6 +47,26 @@ $.getJSON("http://localhost:8080/geo_data", function(data) {
 
 
 function redraw(){
+    // get current view
+    var ltlngbounds = map.getBounds();
+    var sw = ltlngbounds._southWest;
+    var ne = ltlngbounds._northEast;
+
+    //TODO: make dictionary
+    var messageString = 'neLat=' + ne.lat + '&';
+    messageString += 'neLng=' + ne.lng + '&';
+    messageString += 'swLat=' + sw.lat + '&';
+    messageString += 'swLng=' + sw.lng;
+    var payLoad = {neLat : ne.lat, neLng : ne.lng, swLat : sw.lat, swLng : sw.lng};
+    var payLoadJson = JSON.stringify(payLoad);
+    $.ajax({
+        url: 'http://localhost:8080/feedback/',
+        type: 'PUT',
+        contentType : 'application/json',
+        data: payLoadJson//, // or $('#myform').serializeArray()
+        //success: function() { alert('PUT completed' + payLoad.neLat + ' ' + payLoad.neLng + ' ' + payLoad.swLat + ' ' + payLoad.swLng); }
+    });
+
     // clear old data
     map.removeLayer(geojson);
 
