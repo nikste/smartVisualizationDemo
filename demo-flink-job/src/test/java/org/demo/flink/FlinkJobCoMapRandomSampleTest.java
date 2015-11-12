@@ -6,6 +6,7 @@ import com.jayway.jsonpath.Option;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -15,6 +16,62 @@ import static org.hamcrest.CoreMatchers.is;
  */
 public class FlinkJobCoMapRandomSampleTest {
 
+
+
+    @Test
+    public void testJsonFilter() {
+
+        boolean insideGermany = false;
+
+
+        double neLat = 55.05814;
+        double neLng = 15.04205;
+
+        double swLat = 47.27021;
+        double swLng =  5.86624;
+
+        String s = "{\"filter_level\":\"low\",\"retweeted\":false,\"in_reply_to_screen_name\":null,\"possibly_sensitive\":false,\"truncated\":false,\"lang\":\"en\",\"in_reply_to_status_id_str\":null,\"id\":646691060148781057,\"in_reply_to_user_id_str\":null,\"timestamp_ms\":\"1443018138335\",\"in_reply_to_status_id\":null,\"created_at\":\"Wed Sep 23 14:22:18 +0000 2015\",\"favorite_count\":0,\"place\":{\"id\":\"37439688c6302728\",\"bounding_box\":{\"type\":\"Polygon\",\"coordinates\":[[[11.360589,48.061634],[11.360589,48.248124],[11.722918,48.248124],[11.722918,48.061634]]]},\"place_type\":\"city\",\"name\":\"Munich\",\"attributes\":{},\"country_code\":\"DE\",\"url\":\"https://api.twitter.com/1.1/geo/id/37439688c6302728.json\",\"country\":\"Deutschland\",\"full_name\":\"Munich, Bavaria\"},\"coordinates\":{\"type\":\"Point\",\"coordinates\":[11.57412,48.14814]},\"text\":\"#cytwombly @ Museum Brandhorst https://t.co/YvsJhkeru0\",\"contributors\":null,\"geo\":{\"type\":\"Point\",\"coordinates\":[48.14814,11.57412]},\"entities\":{\"trends\":[],\"symbols\":[],\"urls\":[{\"expanded_url\":\"https://instagram.com/p/7-e6AblU5X/\",\"indices\":[31,54],\"display_url\":\"instagram.com/p/7-e6AblU5X/\",\"url\":\"https://t.co/YvsJhkeru0\"}],\"hashtags\":[{\"text\":\"cytwombly\",\"indices\":[0,10]}],\"user_mentions\":[]},\"source\":\"<a href=\\\"http://instagram.com\\\" rel=\\\"nofollow\\\">Instagram<\\/a>\",\"favorited\":false,\"in_reply_to_user_id\":null,\"retweet_count\":0,\"id_str\":\"646691060148781057\",\"user\":{\"location\":\"\",\"default_profile\":false,\"profile_background_tile\":true,\"statuses_count\":113166,\"lang\":\"en\",\"profile_link_color\":\"999698\",\"profile_banner_url\":\"https://pbs.twimg.com/profile_banners/440252035/1438364469\",\"id\":440252035,\"following\":null,\"protected\":false,\"favourites_count\":94175,\"profile_text_color\":\"333333\",\"verified\":false,\"description\":\"she broke up with me i have small eyes\",\"contributors_enabled\":false,\"profile_sidebar_border_color\":\"000000\",\"name\":\"gland\",\"profile_background_color\":\"FFFFFF\",\"created_at\":\"Sun Dec 18 19:15:24 +0000 2011\",\"default_profile_image\":false,\"followers_count\":333,\"profile_image_url_https\":\"https://pbs.twimg.com/profile_images/627172155025981440/K7jb8qtD_normal.jpg\",\"geo_enabled\":true,\"profile_background_image_url\":\"http://pbs.twimg.com/profile_background_images/498641873292886016/3mFDKX3n.jpeg\",\"profile_background_image_url_https\":\"https://pbs.twimg.com/profile_background_images/498641873292886016/3mFDKX3n.jpeg\",\"follow_request_sent\":null,\"url\":\"http://csection.tumblr.com\",\"utc_offset\":10800,\"time_zone\":\"Bucharest\",\"notifications\":null,\"profile_use_background_image\":true,\"friends_count\":161,\"profile_sidebar_fill_color\":\"DDEEF6\",\"screen_name\":\"wronghat\",\"id_str\":\"440252035\",\"profile_image_url\":\"http://pbs.twimg.com/profile_images/627172155025981440/K7jb8qtD_normal.jpg\",\"listed_count\":7,\"is_translator\":false}}\n";
+
+
+        if(!(neLat == 0.0 && neLng == 0.0 &&
+                swLat == 0.0 && swLng == 0.0)){
+            Configuration conf2 = Configuration.defaultConfiguration();
+            Configuration conf = conf2.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+
+            LinkedHashMap geo = JsonPath.using(conf).parse(s).read("$['geo']");
+
+            if(geo != null){
+                if(geo.containsKey("coordinates")) {
+                    insideGermany = true;
+                    ArrayList<Number> coordinates = (ArrayList<Number>) geo.get("coordinates");//.read("[0]",Double.class);
+                    double lat = Double.valueOf(coordinates.get(0).toString());
+                    double lng = Double.valueOf(coordinates.get(1).toString());
+                    System.out.println("lat:" + lat + " lng:" + lng);
+                    System.out.println("swLat" + swLat + " swlng: " + swLng + " " + neLat + " " + neLng);
+                    if (!(swLat <= lat && lat <= neLat &&
+                            swLng <= lng && lng <= neLng)) {
+                        insideGermany = false;
+                    }
+                }
+
+            }else{
+                insideGermany = false;
+            }
+
+            System.out.println(insideGermany);
+            Assert.assertThat(insideGermany, is(true));
+//                    double lat = Double.parseDouble(JsonPath.read(s, "$.coordinates[0]"));
+//                    double lng = Double.parseDouble(JsonPath.read(s, "$.coordinates[1]"));
+
+            // SWLAT < NELAT
+            // SWLNG < NELNG
+//                    if(!(swLat <= lat && lat <= neLat &&
+//                            swLng <= lng && swLng <= swLng)){
+//                        return;
+//                    }
+
+        }
+    }
 
     @Test
     public void testJsonParse() throws Exception {
@@ -47,13 +104,8 @@ public class FlinkJobCoMapRandomSampleTest {
         Assert.assertTrue(exists.get("coordinates") != null);
 
         Assert.assertThat(exists.containsValue("bla"),is(true));
-        //Works fine (null is returned)
-//        JSONArray lat2 = JsonPath.using(conf).parse(jsonWithoutLocation).read("$['geo']['coordinates']");
-//        JSONArray shouldnotexist = JsonPath.using(conf).parse(jsonWithoutLocation).read("$.geo[?(@.coordinates)]");
         LinkedHashMap shouldnotexist = JsonPath.using(conf).parse(jsonWithoutLocation).read("$['geo']");
 
-
-//        double lng2 = JsonPath.using(conf).parse(jsonWithoutLocation).read("$['geo']['coordinates'][1]");
         System.out.println(shouldnotexist);
         Assert.assertTrue(shouldnotexist == null);
     }

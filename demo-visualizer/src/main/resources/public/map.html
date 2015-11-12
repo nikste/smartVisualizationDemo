@@ -6,9 +6,74 @@
     <script src="http://cdn.leafletjs.com/leaflet-0.6.1/leaflet.js"></script>
     <style>
         @import url(http://cdn.leafletjs.com/leaflet-0.6.1/leaflet.css);
+
+        .leaflet-marker-icon,
+        /*.leaflet-marker-shadow {*/
+        .leaflet-clickable {
+        -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+        -moz-animation: fadein 1s; /* Firefox < 16 */
+        -ms-animation: fadein 1s; /* Internet Explorer */
+        -o-animation: fadein 1s; /* Opera < 12.1 */
+        animation: fadein 1s;
+        }
+        .leaflet-deleting {
+        -webkit-animation: fadeout 1s; /* Safari, Chrome and Opera > 12.1 */
+        -moz-animation: fadeout 1s; /* Firefox < 16 */
+        -ms-animation: fadeout 1s; /* Internet Explorer */
+        -o-animation: fadeout 1s; /* Opera < 12.1 */
+        animation: fadeout 1s;
+        }
+
+        @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+        }
+        @keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+        }
+
+        /* Firefox < 16 */
+        @-moz-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+        }
+        @-moz-keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+        }
+
+        /* Safari, Chrome and Opera > 12.1 */
+        @-webkit-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+        }
+        @-webkit-keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+        }
+
+        /* Internet Explorer */
+        @-ms-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+        }
+        @-ms-keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+        }
+
+        /* Opera < 12.1 */
+        @-o-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+        }
+        @-o-keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+        }
     </style>
     <script src="js/jquery-1.10.2.min.js"></script>
-
     <!--<script src="js/send.js"></script>-->
 </head>
 <body>
@@ -25,14 +90,16 @@
 var geojson = new L.FeatureGroup();
   // Read the GeoJSON data with jQuery, and create a circleMarker element for each tweet
 // Each tweet will be represented by a nice red dot
-$.getJSON("http://localhost:8080/geo_data", function(data) {
+/*$.getJSON("http://localhost:8080/geo_data", function(data) {
         var myStyle = {
             radius: 5,
-            fillColor: "red",
-            color: "red",
+            fillColor: "blue",
+            color: "blue",
             weight: 1,
-            opacity: 1,
-            fillOpacity: 1
+            //animateAddingMarkers: true
+            //opacity: 1,
+            className: "leaflet-marker-shadow"
+            //fillOpacity: 1
         };
 
         geojson = L.geoJson(data, {
@@ -41,7 +108,7 @@ $.getJSON("http://localhost:8080/geo_data", function(data) {
             }
         });
         geojson.addTo(map)
-    });
+    });*/
 
 
 
@@ -67,16 +134,22 @@ function redraw(){
     });
 
     // clear old data
-    map.removeLayer(geojson);
 
+    //map.removeLayer(geojson);
+    /*$(tileLayer.getContainer()).fadeOut(500, function(){
+        map.removeLayer(geojson);
+    });*/
+    map.removeLayer(geojson);
     $.getJSON("http://localhost:8080/geo_data", function(data) {
         var myStyle = {
             radius: 5,
-            fillColor: "red",
-            color: "red",
+            fillColor: "blue",
+            color: "blue",
             weight: 1,
-            opacity: 1,
-            fillOpacity: 1
+            //animateAddingMarkers: true
+            className: "leaflet-marker-shadow"
+            //opacity: 1,
+            //fillOpacity: 1
         };
 
         geojson = L.geoJson(data, {
@@ -84,7 +157,11 @@ function redraw(){
                 return L.circleMarker(latlng, myStyle);
             }
         });
+    /*$(tileLayer.getContainer()).fade(500, function(){
         geojson.addTo(map)
+    });*/
+    geojson.addTo(map);
+
     });
 }
   L.control.layers(baseLayers).addTo(map);
@@ -92,21 +169,6 @@ function redraw(){
   redraw.call();
   setInterval(redraw, 2000);
 
-
-  function getAndDeleteAllMarkers() {
-/*
-    var allMarkersObjArray = [];//new Array();
-    var allMarkersGeoJsonArray = [];//new Array();
-
-    $.each(map._layers, function (ml) {
-        //console.log(map._layers)
-        if (map._layers[ml].feature) {
-
-            allMarkersObjArray.push(this)
-                                    allMarkersGeoJsonArray.push(JSON.stringify(this.toGeoJSON()))
-        }
-    })*/
-  }
   </script>
 </body>
 </html>

@@ -106,8 +106,6 @@ public class Application {
                 messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getSwLat() + ",";
                 messageBoundingBox += fakeSpringController.fakeSpringController.currentBox.getSwLng() ;
 
-                System.out.println("sending bounding box:" + fakeSpringController.fakeSpringController.currentBox + "  message = " + messageBoundingBox);
-//                log.debug("sending new bounding box:{}",messageBoundingBox);
                 // send info bounding box:
                 for (int j = 0; j < 100; j++) {
                     try {

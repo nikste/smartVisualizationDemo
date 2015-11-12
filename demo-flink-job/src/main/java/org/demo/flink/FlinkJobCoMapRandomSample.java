@@ -122,6 +122,7 @@ public class FlinkJobCoMapRandomSample {
                         return;
                     }
 
+
 //                    double lat = Double.parseDouble(JsonPath.read(s, "$.coordinates[0]"));
 //                    double lng = Double.parseDouble(JsonPath.read(s, "$.coordinates[1]"));
 
@@ -132,18 +133,18 @@ public class FlinkJobCoMapRandomSample {
 //                        return;
 //                    }
 
-                }else {
-                    if (passProbability < 1.0) {
-                        // sampling happens here
-                        // Bernoulli sampling!!
-                        double r = random.nextDouble();
-                        if (r <= passProbability) {
-                            collector.collect(s);
-                        } else {
-                        }
-                    } else {
+                }
+
+                if (passProbability < 1.0) {
+                    // sampling happens here
+                    // Bernoulli sampling!!
+                    double r = random.nextDouble();
+                    if (r <= passProbability) {
                         collector.collect(s);
+                    } else {
                     }
+                } else {
+                    collector.collect(s);
                 }
             }
 
@@ -166,4 +167,7 @@ public class FlinkJobCoMapRandomSample {
 
         env.execute();
     }
+
+
+
 }
