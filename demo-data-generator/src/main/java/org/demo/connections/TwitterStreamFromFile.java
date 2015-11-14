@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class TwitterStreamFromFile {
 
 
-    private static long messagesPerSecond = (int)(10000.0/10.0);
+    private static long messagesPerSecond = (int)(1000);
     public static boolean running = true;
 
     public static Consumer dataCtrlConsumer = null;
@@ -79,7 +79,9 @@ public class TwitterStreamFromFile {
     private static void sendMessages(Channel dataChannel, String DATA_QUEUE_NAME, Channel dataGeneratorCtrlChannel, String CONTROL_QUEUE_NAME) throws IOException {
         Random randomGenerator = new Random();
 
-        File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/Germany.json");
+//        File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/Germany.json");
+        File file = new File("/home/nikste/Downloads/Germany_1000.json");
+
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = null;
 
@@ -93,14 +95,16 @@ public class TwitterStreamFromFile {
                     br.close();
                     br = new BufferedReader(new FileReader(file));
                     line = br.readLine();
+                    System.out.println(line);
                 }
                 String message = line;//"" + randomGenerator.nextInt(100);//+ "," + randomGenerator.nextInt(100);
                 dataChannel.basicPublish("", DATA_QUEUE_NAME, null, message.getBytes());
+//                System.out.println(line);
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
                 System.out.println("sending " + messagesPerSecond);
-                System.out.println("last message was:" + line);
+//                System.out.println("last message was:" + line);
                 dataGeneratorCtrlChannel.basicConsume(CONTROL_QUEUE_NAME, true, dataCtrlConsumer);
                 System.out.println(" ");
                 System.out.println("parameters:");

@@ -154,8 +154,10 @@ public class Application {
                 if( integer == null){
                     fakeSpringController.langStats.put(lang,1);
                 }else {
-                    //TODO: had nullpointer exception ?
-                    fakeSpringController.langStats.put(lang, fakeSpringController.langStats.get(lang) + 1);
+                    //TODO: had nullpointer exception ? TODO: check dirty workaround
+                    if(fakeSpringController.langStats != null) {
+                        fakeSpringController.langStats.put(lang, fakeSpringController.langStats.get(lang) + 1);
+                    }
                 }
 
                 // fill hashtagStatistics
