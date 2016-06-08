@@ -51,7 +51,16 @@
 - select notebook compile and run
 
 
+# Next steps (proposition)
+## contributions to open source projects
+- update to flink code to stable version (e.g. 1.0) (change code in streaming-contrib, unblocking buffer ? )
+- update Zeppelin stuff to work with streaming (rewrite interpreter class to work with streamin scala shell in stable flink version)
+- extend zeppelin interpreter to communicate kill message to Flink-job-manager (these three steps might be enough for the deliverable for streamline)
 
+## demo paper
+- find better way to send messages from map
+- find a nicer usecase
+- find statistics or examples how this will help and how much it will help.
 
 
 
