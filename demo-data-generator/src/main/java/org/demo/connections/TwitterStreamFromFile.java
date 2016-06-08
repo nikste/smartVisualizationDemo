@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class TwitterStreamFromFile {
 
 
-    private static long messagesPerSecond = (int)(1000);
+    private static long messagesPerSecond = (int)(100);
     public static boolean running = true;
 
     public static Consumer dataCtrlConsumer = null;
@@ -80,8 +80,8 @@ public class TwitterStreamFromFile {
         Random randomGenerator = new Random();
 
 //        File file = new File("/media/nikste/4E404C27404C185B/stuff/linux_ext/dataset/Germany.json");
-        File file = new File("/home/nikste/Downloads/Germany_1000.json");
-
+//        File file = new File("/home/nikste/Downloads/Germany_1000.json");
+        File file = new File("/home/nikste/datasets/tweets/Germany_1000.json");
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = null;
 
